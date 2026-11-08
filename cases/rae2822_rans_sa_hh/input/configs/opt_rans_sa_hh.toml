@@ -1,0 +1,146 @@
+schema_version = 1
+name = "rae2822_su2opt_opt"
+
+[case]
+name = "rae2822_rans_sa_hh"
+root = "cases/rae2822_rans_sa_hh"
+ndim = 2
+mesh = "input/mesh/mesh_RAE2822_turb.su2"
+
+[[case.boundary]]
+markers = ["AIRFOIL"]
+bc = "heatflux"
+value = 0.0
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["FARFIELD"]
+bc = "far"
+roles = []
+
+[case.reference]
+origin_moment = [0.25, 0.0, 0.0]
+length = 1.0
+area = 1.0
+
+[case.freestream]
+temperature = 288.15
+reynolds_number = "6.5E6"
+reynolds_length = 1.0
+
+[geometry]
+parameterization = "hicks_henne"
+
+[dv]
+[dv.shape]
+n_dv = 19
+distribution = "even"
+bump_width = 3
+bound = 0.01
+scaler = "auto"
+# explicit: an enabled block states every value it uses
+enabled = true
+
+[[points]]
+id = "su2opt"
+mach = 0.729
+weight = 1
+aoa_init = 2.31
+# explicit: an enabled block states every value it uses
+aoa_upper = 5.0
+
+[trim]
+enabled = true
+# explicit: an enabled block states every value it uses
+max_iter = 6
+tol = 0.0001
+dcl_da_init = 0.11
+alpha_clip = [0.0, 5.0]
+
+[objective]
+expression = "wsum(drag)"
+scaler = 1000.0
+
+[constraints]
+geometry = true
+
+[constraints.thickness]
+stations = [[0.35, 0.12], [0.96, 0.005], [0.99, 0.0012]]
+# explicit: an enabled block states every value it uses
+enabled = true
+axes = "chord_zspan"
+nSpan = 2
+nChord = 2
+scaled = false
+te_offset = 0.05
+
+[constraints.lift]
+enabled = true
+kind = "equals"
+equals = 0.724
+# explicit: an enabled block states every value it uses
+scaler = 1.0
+
+[constraints.moment]
+enabled = true
+kind = "max"
+upper = 0.0935
+# explicit: an enabled block states every value it uses
+scaler = 1.0
+axis = "z"
+
+[constraints.volume]
+enabled = false
+
+[constraints.le_radius]
+enabled = false
+
+[optimizer]
+name = "SLSQP"
+
+[optimizer.SLSQP]
+MAXIT = 100
+ACC = 1e-10
+IFILE = "opt_SLSQP.txt"
+
+[solver]
+[solver.numerics]
+num_method_grad = "WEIGHTED_LEAST_SQUARES"
+cfl_number = 10.0
+conv_method_flow = "JST"
+slope_limiter_flow = "VENKATAKRISHNAN"
+venkat_limiter_coeff = 0.05
+jst_sensor_coeff = "( 0.5, 0.02 )"
+time_discre_flow = "EULER_IMPLICIT"
+
+[solver.linear]
+solver = "FGMRES"
+error = "1E-3"
+iter = 10
+
+[solver.primal]
+iter = 15000
+mglevel = 0
+cfl_adapt = false
+conv_residual_minval = -12
+warm_start = true
+
+[solver.adjoint]
+iter = 20000
+mglevel = 0
+conv_residual_minval = -12
+
+[deform]
+linear_solver_iter = 500
+nonlinear_iter = 1
+linear_solver_error = 1e-14
+stiffness_type = "INVERSE_VOLUME"
+
+[execution]
+task = "run_driver"
+adjoint_restart = false
+derivative_mode = "rev"
+
+[output]
+on_exists = "fail"
+run_id = "auto"

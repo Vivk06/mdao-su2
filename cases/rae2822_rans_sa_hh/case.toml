@@ -1,0 +1,49 @@
+schema_version = 1
+
+# Case-level defaults for RAE 2822. The selected TOML states run settings.
+
+[case]
+name        = "rae2822_rans_sa_hh"
+root        = "cases/rae2822_rans_sa_hh"            # repo-relative
+ndim        = 2
+# Paths relative to root.  input/ is read-only at runtime.
+mesh        = "input/mesh/mesh_RAE2822_turb.su2"    # 13937 pts, AIRFOIL(192)/FARFIELD
+
+# Empty = the wall.  A non-wall value is rejected by validate.py.
+[[case.boundary]]
+markers = ["AIRFOIL"]
+bc = "heatflux"
+value = 0.0
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["FARFIELD"]
+bc = "far"
+roles = []
+
+[case.reference]
+origin_moment = [0.25, 0.0, 0.0]                    # quarter chord
+length        = 1.0                                 # per unit chord
+area          = 1.0
+
+[case.freestream]
+temperature     = 288.15
+reynolds_number = "9.0E6"                           # Nemec (the tutorial used 6.5E6)
+reynolds_length = 1.0
+
+[geometry]
+ffd   = "ffd10"
+zspan = 0.5                                    # MUST match geometry/ffd_lattice.py ZSPAN
+
+[geometry.ffd_files]
+ffd10 = "input/ffd/ffd_rae2822.xyz"                 # 10x2x2 -> 18 shape DVs
+ffd20 = "input/ffd/ffd_rae2822_20.xyz"              # 38 DVs
+ffd30 = "input/ffd/ffd_rae2822_30.xyz"              # 58 DVs
+ffd30cos = "input/ffd/ffd_rae2822_30_cosine.xyz"    # 56 DVs, cosine-spaced (LE-dense)
+
+# Body-fitted box: j-planes follow airfoil. Flat box has 81% cross-talk at LE.
+ffd30cosfit = "input/ffd/ffd_rae2822_30_cosine_fitted.xyz"
+
+# Nemec (2004) Table 5 minimum t/c.  Case geometry, not a per-run choice.
+[constraints.thickness]
+stations = [[0.35, 0.1204], [0.96, 0.0050], [0.99, 0.0012]]

@@ -1,0 +1,64 @@
+# ADODG Case 3 intake recipe. The human guide summarizes its admission.
+# Paper: Yang & Da Ronch 2018 , p. 7 Eq. (8), pp. 23-25.
+# Source: generated here from that geometry; no external input.
+#
+#   python run/mesh.py airfoil --config <this> --output input/geom/naca0012_te_closed.dat
+#   python run/mesh.py ffd     --config <this> --n-span <3|5> --output input/ffd/ffd_adodg3_wing_n<n>.xyz
+#   python run/mesh.py wing3d  --config <this> --surface input/geom/naca0012_te_closed.dat --level <tiny|coarse|medium|main> \
+#                              --output input/mesh/mesh_adodg3_<level>.su2
+# (paths relative to cases/adodg3_naca0012_euler_ffd/; levels include
+# tiny, coarse, medium, and main)
+
+[mesh.airfoil]
+enabled = true
+# Eq. (8): NACA 0012 with the x^4 coefficient -0.1036, zero-thickness TE (p. 7).
+source = "naca4:0012:closed:257"
+n_points = 257                    # 129 points per surface, LE and TE shared
+spacing = "cosine"
+te = "keep"                       # Eq. (8) already closes the TE
+
+[mesh.ffd]
+enabled = true
+kind = "wing"
+nx = 6                            # chordwise control points (twist is a rigid section rotation)
+nz = 2
+n_span = 3                        # override with --n-span 5 for the FD-validated twist case
+spacing = "uniform"
+x_bounds = [-0.05, 1.05]          # TE axis at x_fraction = 1.05/1.10
+y_bounds = [0.0, 3.10]            # root section on the symmetry plane; encloses the 3.06 c tip
+z_bounds = [-0.10, 0.10]          # symmetric about the TE height z = 0
+le_te = [0.0, 1.0]                # chord; its TE is the twist axis
+
+[mesh.wing3d]
+enabled = true
+span = 3.0                        # rectangular part; the revolved cap adds max half-thickness (p. 23)
+tip = "revolved"                  # surface of revolution of the section about its chord (p. 23)
+farfield_radius = 20.0            # p. 23
+farfield_center = [0.25, 0.0, 0.0]   # root quarter chord
+# Base sizes at level_scale = 1, chord units. The CAD has a D-shaped root
+# section extruded through the span; the LE, TE, tip and wake receive graded
+# refinement. Main scale is tuned below GitHub's 50 MiB file warning threshold.
+wall_size = 0.0094
+le_size = 0.0019
+te_size = 0.0019
+tip_size = 0.0024
+far_size = 0.94
+size_growth = 0.094
+edge_band = 0.1
+te_band = 0.1                    # independent TE band; override for aft-chord/wake study
+te_normal_scale = 10.0           # confine widened TE band near wall and wake centerline
+# "sampled" reproduces the tracked te_refined/aft_refined meshes; their LE
+# is 0.005-0.020 c along the span (gmsh samples the 3 c LE line 20 times).
+# `--edge-distance exact` gives the requested LE size at every station.
+edge_distance = "sampled"
+# This Gmsh mesh targets the paper's domain shape with a lower cell budget.
+level_scale = { main = 1.91 }
+wing_marker = "WING"
+tip_marker = "TIP"
+symmetry_marker = "SYMMETRY"
+farfield_marker = "FARFIELD"
+
+[mesh.wing3d.quality]
+min_dihedral_deg = 3.0
+max_dihedral_deg = 175.0
+max_aspect_ratio_p99 = 10.0

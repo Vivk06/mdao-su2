@@ -1,0 +1,19 @@
+# RAE 2822 intake recipe. Read-only after admission.
+#
+# [mesh.ffd] holds the numbers that define this case's FFD box.
+# It reproduces the shipped boxes byte for byte:
+#   python run/mesh.py ffd --config cases/rae2822_rans_sa_hh/input/mesh/recipe.toml --output <ffd_rae2822.xyz>
+#   ... --nx 20                  -> ffd_rae2822_20.xyz
+#   ... --nx 30                  -> ffd_rae2822_30.xyz
+#   ... --nx 30 --spacing cosine -> ffd_rae2822_30_cosine.xyz
+# Source: mesh_RAE2822_turb.su2 (13,937 points) and rae2822_surface.dat were taken in without a recorded origin (2026-10-07); the FFD boxes are generated here.
+
+[mesh.ffd]
+enabled = true
+kind = "airfoil"
+nx = 10                          # 10x2x2 -> 18 shape DVs
+spacing = "uniform"
+zspan = 0.5                      # k planes at z = -/+ 0.5 (geometry.zspan)
+x_bounds = [-0.01, 1.01]         # bracket LE (x = 0) and TE (x = 1)
+y_bounds = [-0.08, 0.08]         # bracket the section, y in [-0.058, 0.064]
+le_te = [0.0, 1.0]               # chord for cosine-spaced interior stations

@@ -1,0 +1,140 @@
+# Fully expanded runnable configuration.
+
+name = "adodg3_trim_le_exact"
+schema_version = 1
+
+[case]
+mesh = "input/mesh/mesh_adodg3_le_exact.su2"
+name = "adodg3_naca0012_euler_ffd"
+ndim = 3
+root = "cases/adodg3_naca0012_euler_ffd"
+
+[[case.boundary]]
+bc = "euler"
+markers = [ "WING" ]
+roles = [ "design", "monitor", "plot", "deform" ]
+
+[[case.boundary]]
+bc = "euler"
+markers = [ "TIP" ]
+roles = [ "design", "monitor", "plot", "deform" ]
+
+[[case.boundary]]
+bc = "sym"
+markers = [ "SYMMETRY" ]
+roles = [ "deform" ]
+
+[[case.boundary]]
+bc = "far"
+markers = [ "FARFIELD" ]
+roles = [  ]
+
+[case.freestream]
+dimensionalization = "FREESTREAM_PRESS_EQ_ONE"
+pressure = 101325.0
+temperature = 288.15
+
+[case.physics]
+kind = "euler"
+
+[case.reference]
+area = 3.0
+length = 1.0
+origin_moment = [ 0.25, 0.0, 0.0 ]
+
+[constraints]
+geometry = false
+
+[constraints.lift]
+enabled = true
+equals = 0.375
+kind = "equals"
+scaler = 1.0
+
+[deform]
+linear_solver = "FGMRES"
+linear_solver_error = 1e-14
+linear_solver_iter = 500
+stiffness_type = "WALL_DISTANCE"
+
+[execution]
+adjoint_restart = false
+derivative_mode = "rev"
+task = "trim"
+
+[geometry]
+ffd = "wing_n3"
+ffd_order = "pygeo_default"
+parameterization = "ffd"
+pin_symmetry = false
+zspan = 0.5
+
+[geometry.ffd_files]
+wing_n3 = "input/ffd/ffd_adodg3_wing_n3.xyz"
+wing_n5 = "input/ffd/ffd_adodg3_wing_n5.xyz"
+
+[objective]
+expression = "wsum(drag)"
+scaler = 100.0
+
+[output]
+on_exists = "fail"
+run_id = "jst_k4_002_trim_le_exact"
+
+[[points]]
+aoa_init = 4.258
+aoa_lower = 2.0
+aoa_upper = 7.0
+id = "adodg3"
+mach = 0.5
+weight = 1
+
+[postprocess]
+
+[postprocess.span_load]
+aspect_ratio = 6.0
+enabled = true
+lift_axis = "z"
+n_stations = 60
+semispan = 3.0
+span_axis = "y"
+
+[solver]
+
+[solver.adjoint]
+conv_residual_minval = -12
+iter = 20000
+mglevel = 0
+
+[solver.convergence]
+cauchy_elems = 100
+cauchy_eps = 1e-10
+startiter = 25
+
+[solver.linear]
+error = "1E-6"
+iter = 2
+prec = "ILU"
+solver = "FGMRES"
+
+[solver.numerics]
+cfl_number = 7.5
+conv_method_flow = "JST"
+jst_sensor_coeff = "( 0.5, 0.02 )"
+muscl_flow = "NO"
+num_method_grad = "GREEN_GAUSS"
+time_discre_flow = "EULER_IMPLICIT"
+
+[solver.primal]
+cfl_adapt = false
+conv_residual_minval = -12
+iter = 20000
+mglevel = 0
+warm_start = false
+
+[trim]
+alpha_clip = [ 2.0, 7.0 ]
+dcl_da_init = 0.082
+enabled = true
+max_iter = 8
+tol = 1e-05

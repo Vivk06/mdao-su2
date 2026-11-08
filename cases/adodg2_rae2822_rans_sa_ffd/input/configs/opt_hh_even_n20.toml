@@ -1,0 +1,163 @@
+# Fully expanded runnable configuration.
+
+name = "adodg2_hh_even_n20_opt"
+schema_version = 1
+
+[case]
+mesh = "input/mesh/mesh_adodg2_remesh_25k.su2"
+name = "adodg2_rae2822_rans_sa_ffd"
+ndim = 2
+root = "cases/adodg2_rae2822_rans_sa_ffd"
+
+[[case.boundary]]
+bc = "heatflux"
+markers = [ "AIRFOIL" ]
+roles = [ "design", "monitor", "plot", "deform" ]
+value = 0.0
+
+[[case.boundary]]
+bc = "far"
+markers = [ "FARFIELD" ]
+roles = [  ]
+
+[case.freestream]
+reynolds_length = 1.0
+reynolds_number = "6.5E6"
+temperature = 288.15
+
+[case.physics]
+kind = "rans_sa"
+
+[case.reference]
+area = 1.0
+length = 1.0
+origin_moment = [ 0.25, 0.0, 0.0 ]
+
+[constraints]
+geometry = true
+
+[constraints.le_radius]
+axis = [ 0.0, 1.0, 0.0 ]
+chord_dir = [ -1.0, 0.0, 0.0 ]
+enabled = true
+le_x = 0.01
+lower = 0.8
+nSpan = 2
+
+[constraints.lift]
+enabled = true
+equals = 0.824
+kind = "equals"
+scaler = 1.0
+
+[constraints.moment]
+axis = "z"
+enabled = true
+kind = "max"
+pivot = [ 0.25, 0.0, 0.0 ]
+scaler = 1.0
+upper = 0.092
+
+[constraints.thickness]
+axes = "chord_zspan"
+enabled = true
+nChord = 2
+nSpan = 2
+scaled = false
+stations = [ [ 0.35, 0.1204 ], [ 0.96, 0.005 ], [ 0.99, 0.0012 ] ]
+te_offset = 0.05
+
+[constraints.volume]
+enabled = true
+le_x = 0.01
+lower = 1.0
+nChord = 10
+nSpan = 2
+te_x = 0.99
+
+[deform]
+linear_solver = "FGMRES"
+linear_solver_error = 1e-14
+linear_solver_iter = 500
+nonlinear_iter = 1
+stiffness_type = "INVERSE_VOLUME"
+
+[dv]
+
+[dv.shape]
+bound = 0.05
+bump_width = 3
+distribution = "even"
+enabled = true
+n_dv = 20
+scaler = 500.0
+
+[execution]
+adjoint_restart = false
+derivative_mode = "auto"
+task = "run_driver"
+
+[geometry]
+ffd = "ffd10"
+parameterization = "hicks_henne"
+zspan = 0.5
+
+[geometry.ffd_files]
+ffd10 = "input/ffd/ffd_rae2822.xyz"
+ffd20 = "input/ffd/ffd_rae2822_20.xyz"
+ffd30 = "input/ffd/ffd_rae2822_30.xyz"
+ffd30cos = "input/ffd/ffd_rae2822_30_cosine.xyz"
+
+[objective]
+expression = "wsum(drag)"
+scaler = 100.0
+
+[optimizer]
+name = "SLSQP"
+
+[optimizer.SLSQP]
+ACC = 1e-06
+IFILE = "opt_SLSQP.txt"
+MAXIT = 200
+
+[output]
+on_exists = "fail"
+run_id = "auto"
+
+[[points]]
+aoa_init = 2.79
+aoa_upper = 5.0
+id = "adodg2"
+mach = 0.734
+weight = 1
+
+[solver]
+
+[solver.adjoint]
+conv_residual_minval = -8
+iter = 50000
+mglevel = 0
+
+[solver.adjoint_settings]
+relaxation_factor = 0.6
+
+[solver.linear]
+error = "1E-3"
+iter = 12
+
+[solver.numerics]
+cfl_number = 10.0
+
+[solver.primal]
+cfl_adapt = true
+conv_residual_minval = -10
+iter = 50000
+mglevel = 3
+warm_start = false
+
+[trim]
+alpha_clip = [ 0.0, 5.0 ]
+dcl_da_init = 0.11
+enabled = true
+max_iter = 6
+tol = 0.0001

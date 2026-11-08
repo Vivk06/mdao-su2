@@ -1,0 +1,183 @@
+# Self-contained resolved configuration. Do not add include.
+
+schema_version = 1
+name = "oneram6_opt"
+
+[case]
+name = "oneram6_euler_ffd"
+root = "cases/oneram6_euler_ffd"
+ndim = 3
+mesh = "input/mesh/mesh_ONERAM6_inv_FFD.su2"
+
+[case.physics]
+kind = "euler"
+
+[[case.boundary]]
+markers = ["UPPER_SIDE"]
+bc = "euler"
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["LOWER_SIDE"]
+bc = "euler"
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["TIP"]
+bc = "euler"
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["XNORMAL_FACES"]
+bc = "far"
+roles = []
+
+[[case.boundary]]
+markers = ["ZNORMAL_FACES"]
+bc = "far"
+roles = []
+
+[[case.boundary]]
+markers = ["YNORMAL_FACE"]
+bc = "far"
+roles = []
+
+[[case.boundary]]
+markers = ["SYMMETRY_FACE"]
+bc = "sym"
+roles = ["deform"]
+
+[case.reference]
+origin_moment = [0.2015, 0.0, 0.0]
+length = 0.64607
+area = 0.0
+
+[case.freestream]
+temperature = 288.15
+pressure = 101325.0
+dimensionalization = "FREESTREAM_PRESS_EQ_ONE"
+
+[geometry]
+ffd = "wing"
+ffd_order = "bezier"
+zspan = 0.5
+
+[geometry.ffd_files]
+wing = "input/ffd/ffd_oneram6_wing.xyz"
+
+[trim]
+dcl_da_init = 0.1
+# explicit: an enabled block states every value it uses
+enabled = true
+max_iter = 6
+tol = 0.0001
+alpha_clip = [0.0, 5.0]
+
+[solver]
+[solver.numerics]
+num_method_grad = "GREEN_GAUSS"
+cfl_number = 7.5
+conv_method_flow = "JST"
+jst_sensor_coeff = "( 0.5, 0.02 )"
+time_discre_flow = "EULER_IMPLICIT"
+
+[solver.linear]
+solver = "FGMRES"
+prec = "ILU"
+error = "1E-3"
+iter = 10
+
+[solver.convergence]
+startiter = 25
+cauchy_elems = 100
+cauchy_eps = 1e-10
+
+[solver.primal]
+iter = 6000
+mglevel = 0
+cfl_adapt = false
+conv_residual_minval = -12
+warm_start = false
+
+[solver.adjoint]
+iter = 6000
+mglevel = 0
+conv_residual_minval = -12
+
+[constraints]
+geometry = true
+
+[constraints.thickness]
+enabled = true
+stations = [[0.0, 0.077], [0.2, 0.072], [0.4, 0.066], [0.6, 0.06], [0.8, 0.054]]
+axes = "span_y"
+probe_x = [0.304668, 0.399964, 0.486312, 0.582895, 0.669214]
+te_offset = 0.01
+span_offsets = [0.001, 0.006]
+nSpan = 2
+nChord = 2
+scaled = false
+
+[constraints.lift]
+enabled = true
+kind = "equals"
+equals = 0.286
+# explicit: an enabled block states every value it uses
+scaler = 1.0
+
+[constraints.volume]
+enabled = false
+
+[constraints.le_radius]
+enabled = false
+
+[[points]]
+id = "m6"
+mach = 0.8395
+weight = 1
+aoa_init = 3.06
+aoa_scaler = 0.18
+aoa_lower = -3.0
+# explicit: an enabled block states every value it uses
+aoa_upper = 5.0
+
+[dv]
+[dv.shape]
+pattern = "ffd3d"
+direction = "z"
+link_k = false
+bound = 1e6
+scaler = "auto"
+freeze_i = [0, 1, 9, 10]
+freeze_j = [7, 8]
+freeze_k = []
+# explicit: an enabled block states every value it uses
+enabled = true
+
+[objective]
+expression = "wsum(drag)"
+scaler = 100.0
+
+[optimizer]
+name = "SLSQP"
+
+[optimizer.SLSQP]
+MAXIT = 100
+ACC = 1e-6
+IFILE = "opt_SLSQP.txt"
+
+[deform]
+linear_solver = "FGMRES"
+linear_solver_iter = 500
+linear_solver_error = 1e-14
+stiffness_type = "WALL_DISTANCE"
+
+[execution]
+task = "run_driver"
+derivative_mode = "rev"
+# explicit: an enabled block states every value it uses
+adjoint_restart = true
+
+[output]
+on_exists = "fail"
+run_id = "auto"

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mdao-su2"
+version = "0.1.0"
+description = "SU2-based gradient-based aerodynamic shape optimization via OpenMDAO/MPhys"
+requires-python = ">=3.14,<3.15"
+license = "LGPL-2.1-only"
+
+# Empty: runtime stack (pysu2, mpi4py, openmdao, pygeo, pyoptsparse) provisioned by setup.sh.
+# pygeo/pyspline PyPI names are squatted; pyoptsparse is not on PyPI.
+# The environment and install procedure are in docs/human-guide.pdf.
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]

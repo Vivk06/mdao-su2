@@ -1,0 +1,127 @@
+# Fully expanded runnable configuration.
+
+name = "e387_su2_standard_sa_bcm_fd"
+schema_version = 1
+
+[case]
+mesh = "input/mesh/ogrid_e387.su2"
+name = "e387_rans_sa_bcm"
+ndim = 2
+root = "cases/e387_rans_sa_bcm"
+
+[[case.boundary]]
+bc = "heatflux"
+markers = [ "Airfoil" ]
+roles = [ "design", "monitor", "plot", "deform" ]
+value = 0.0
+
+[[case.boundary]]
+bc = "far"
+markers = [ "Farfield" ]
+roles = [  ]
+
+[case.freestream]
+dimensionalization = "FREESTREAM_VEL_EQ_MACH"
+reynolds_length = 1.0
+reynolds_number = "200000.0"
+temperature = 288.15
+
+[case.physics]
+kind = "rans_sa"
+turbulence_intensity = 0.001
+
+[case.physics.transition]
+model = "NONE"
+
+[case.physics.turbulence]
+model = "SA"
+options = [ "BCM" ]
+
+[case.reference]
+area = 0.0
+length = 1.0
+origin_moment = [ 0.25, 0.0, 0.0 ]
+
+[dv]
+
+[dv.shape]
+bound = 0.05
+enabled = true
+scaler = "auto"
+
+[execution]
+adjoint_restart = false
+derivative_mode = "rev"
+task = "check_totals"
+
+[geometry]
+dat_file = "input/geom/e387_surface.dat"
+n_cst = 8
+parameterization = "cst"
+zspan = 0.5
+
+[objective]
+expression = "wsum(drag)"
+scaler = 100.0
+
+[output]
+on_exists = "fail"
+
+[[points]]
+alpha = "design"
+aoa_init = 2.0
+aoa_lower = 0.0
+aoa_upper = 5.0
+id = "e387_sa_bcm_ct"
+mach = 0.06
+weight = 1.0
+
+[solver]
+
+[solver.adjoint]
+conv_residual_minval = -8
+iter = 100000
+mglevel = 0
+
+[solver.adjoint_settings]
+frozen_visc_disc = false
+relaxation_factor = 0.6
+
+[solver.linear]
+error = "1E-4"
+iter = 10
+prec = "ILU"
+solver = "FGMRES"
+
+[solver.numerics]
+cfl_number = 1.0
+conv_method_flow = "ROE"
+conv_method_turb = "SCALAR_UPWIND"
+muscl_flow = "YES"
+muscl_turb = "NO"
+num_method_grad = "GREEN_GAUSS"
+slope_limiter_flow = "VENKATAKRISHNAN"
+slope_limiter_turb = "NONE"
+time_discre_turb = "EULER_IMPLICIT"
+venkat_limiter_coeff = 0.05
+
+[solver.primal]
+conv_residual_minval = -14
+iter = 100000
+mglevel = 0
+warm_start = false
+
+[trim]
+alpha_clip = [ 0.0, 5.0 ]
+dcl_da_init = 0.11
+enabled = true
+max_iter = 6
+tol = 0.0001
+
+[verification]
+alpha_band = 0.0001
+alpha_step = 0.0001
+form = "central"
+shape_band = 0.05
+shape_step = 1e-06
+step_calc = "abs"

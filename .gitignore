@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Created by setup.sh
+venv/
+.env_local
+
+# Run output: every run writes under its case's output directory by default
+cases/*/output/
+
+# Solver output written outside a run directory
+*.vtu
+*.vtk
+*.szplt
+*.plt
+restart_*.dat
+solution_*.dat
+history*.csv
+history*.dat
+surface_*.csv
+forces_breakdown.dat
+flow.meta
+*.hst
+*.npy
+*_out/
+
+# LaTeX build files
+*.aux
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.toc
+
+# Editor and OS files
+*.swp
+*.swo
+*~
+.DS_Store

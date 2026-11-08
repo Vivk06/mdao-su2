@@ -1,0 +1,33 @@
+schema_version = 1
+
+[case]
+name = "nlf0416_rans_sa_bcm"
+root = "cases/nlf0416_rans_sa_bcm"
+ndim = 2
+mesh = "input/mesh/nlf0416_grid.su2"
+
+[case.physics]
+kind = "rans_sa"
+
+[[case.boundary]]
+markers = ["upper", "lower"]
+bc = "heatflux"
+value = 0.0
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["far", "out"]
+bc = "far"
+roles = []
+
+[case.reference]
+origin_moment = [0.25, 0.0, 0.0]
+length = 1.0
+area = 1.0
+
+[case.freestream]
+temperature = 300.0
+pressure = 183122.4883
+reynolds_number = "4E6"
+reynolds_length = 1.0
+dimensionalization = "DIMENSIONAL"

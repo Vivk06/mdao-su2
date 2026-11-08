@@ -1,0 +1,102 @@
+schema_version = 1
+
+# Case-level defaults for ONERA M6 — inviscid, 3D, native-FFD.
+# Every value from inv_ONERAM6_adv.cfg (the file wins over the tutorial web page).
+
+[case]
+name = "oneram6_euler_ffd"
+root = "cases/oneram6_euler_ffd"
+ndim = 3
+mesh = "input/mesh/mesh_ONERAM6_inv_FFD.su2"   # 108396 pts / 582752 elems / 7 markers
+
+[case.physics]
+# SOLVER= EULER. Also REMOVES turb-model keys from cfg (SU2 silently ignores them).
+kind = "euler"
+
+# Three wall, three far-field, one symmetry plane.
+# YNORMAL_FACE is SINGULAR (no trailing S) — mesh and shipped cfg agree; tutorial web page is wrong.
+# deform includes SYMMETRY_FACE: without it, 114 wall nodes at y=0 get BC_Clamped and never move.
+# Named in DEFORM_MESH (not SYM_PLANE) to preserve the adjoint reverse pass.
+[[case.boundary]]
+markers = ["UPPER_SIDE"]
+bc = "euler"
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["LOWER_SIDE"]
+bc = "euler"
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["TIP"]
+bc = "euler"
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["XNORMAL_FACES"]
+bc = "far"
+roles = []
+
+[[case.boundary]]
+markers = ["ZNORMAL_FACES"]
+bc = "far"
+roles = []
+
+[[case.boundary]]
+markers = ["YNORMAL_FACE"]
+bc = "far"
+roles = []
+
+[[case.boundary]]
+markers = ["SYMMETRY_FACE"]
+bc = "sym"
+roles = ["deform"]
+
+[case.reference]
+origin_moment = [0.2015, 0.0, 0.0]
+length        = 0.64607
+# REF_AREA=0 is a SENTINEL: SU2 computes planform area from MARKER_MONITORING.
+area          = 0.0
+
+[case.freestream]
+temperature = 288.15
+pressure    = 101325.0
+dimensionalization = "FREESTREAM_PRESS_EQ_ONE"
+
+[geometry]
+ffd = "wing"
+# Bezier patch (order=nCtl). pyGeo cubic default is a DIFFERENT function.
+ffd_order = "bezier"
+zspan = 0.5
+
+[geometry.ffd_files]
+# 11x9x2=198 control points. i=chord(x), j=span(y), k=thickness(z).
+wing = "input/ffd/ffd_oneram6_wing.xyz"
+
+[trim]
+# DCL_DALPHA=0.1 from the tutorial; finite-AR wing is shallower than thin-airfoil 0.11.
+dcl_da_init = 0.1
+
+[solver.numerics]
+num_method_grad   = "GREEN_GAUSS"
+cfl_number        = 7.5
+conv_method_flow  = "JST"
+jst_sensor_coeff  = "( 0.5, 0.02 )"
+time_discre_flow  = "EULER_IMPLICIT"
+
+[solver.linear]
+solver = "FGMRES"
+prec   = "ILU"
+error  = 1e-6
+# iter=2: cheap inexact-Newton; outer fixed-point absorbs the inexactness.
+iter   = 2
+
+[solver.convergence]
+startiter    = 25
+cauchy_elems = 100
+cauchy_eps   = 1e-10
+
+# Spanwise thickness constraints declared but disabled until cost is known.
+[constraints.thickness]
+enabled  = false
+stations = [[0.0, 0.077], [0.2, 0.072], [0.4, 0.066], [0.6, 0.060], [0.8, 0.054]]

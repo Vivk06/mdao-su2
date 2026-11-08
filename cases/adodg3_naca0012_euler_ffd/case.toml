@@ -1,0 +1,60 @@
+schema_version = 1
+
+# ADODG Case 3: twist optimisation of the NACA 0012 wing in subsonic inviscid flow.
+# Paper: Yang & Da Ronch 2018, pp. 23-25 .
+# The human guide summarizes the mesh gates and recorded result.
+
+[case]
+name = "adodg3_naca0012_euler_ffd"
+root = "cases/adodg3_naca0012_euler_ffd"
+ndim = 3
+# Admitted exact-LE grid: 1,283,195 tetrahedra, 240,994 nodes.
+mesh = "input/mesh/mesh_adodg3_le_exact.su2"
+
+[case.physics]
+kind = "euler"                        # inviscid (p. 23)
+
+[[case.boundary]]
+markers = ["WING"]
+bc = "euler"
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["TIP"]
+bc = "euler"
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["SYMMETRY"]
+bc = "sym"
+roles = ["deform"]
+
+[[case.boundary]]
+markers = ["FARFIELD"]
+bc = "far"
+roles = []
+
+[case.reference]
+# Half-wing reference area S = 3 c^2 and b/2 = 3 c, the tip cap excluded (p. 23).
+area = 3.0
+length = 1.0
+origin_moment = [0.25, 0.0, 0.0]      # unused by the objective; stated so it is explicit
+
+[case.freestream]
+# Euler coefficients depend on Mach alone; these fix the dimensional state only.
+temperature = 288.15
+pressure = 101325.0
+dimensionalization = "FREESTREAM_PRESS_EQ_ONE"
+
+[geometry]
+parameterization = "ffd"
+ffd = "wing_n3"
+ffd_order = "pygeo_default"           # cubic in span
+# No pin: twist rotates sections about +y, which never moves a node off y = 0
+# (within 1e-12); the pin also refuses a multi-marker wall.
+pin_symmetry = false
+zspan = 0.5
+
+[geometry.ffd_files]
+wing_n3 = "input/ffd/ffd_adodg3_wing_n3.xyz"
+wing_n5 = "input/ffd/ffd_adodg3_wing_n5.xyz"

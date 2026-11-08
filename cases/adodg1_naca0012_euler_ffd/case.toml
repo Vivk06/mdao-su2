@@ -1,0 +1,33 @@
+schema_version = 1
+
+[case]
+name = "adodg1_naca0012_euler_ffd"
+root = "cases/adodg1_naca0012_euler_ffd"
+ndim = 2
+# Euler gmsh mesh: 128-node sharp-TE wall, 50 c far field, 5e-4 c inviscid
+# first spacing, aspect ratio <= 79.
+mesh = "input/mesh/mesh_adodg1_naca0012_euler_gmsh.su2"
+
+[[case.boundary]]
+markers = ["airfoil"]
+bc = "euler"
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["farfield"]
+bc = "far"
+roles = []
+
+[case.reference]
+origin_moment = [0.25, 0.0, 0.0]
+length = 1.0
+area = 1.0
+
+[case.freestream]
+temperature = 288.15
+pressure = 101325.0
+reynolds_number = "6.0E6"
+dimensionalization = "DIMENSIONAL"
+
+[case.physics]
+kind = "euler"

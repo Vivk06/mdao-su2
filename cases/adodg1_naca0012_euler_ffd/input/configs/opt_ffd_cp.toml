@@ -1,0 +1,166 @@
+# Fully expanded runnable configuration.
+
+name = "adodg1_ffd_cp_opt"
+schema_version = 1
+
+[case]
+mesh = "input/mesh/mesh_adodg1_naca0012_euler_half.su2"
+name = "adodg1_naca0012_euler_ffd"
+ndim = 2
+root = "cases/adodg1_naca0012_euler_ffd"
+
+[[case.boundary]]
+bc = "euler"
+markers = [ "airfoil" ]
+roles = [ "design", "monitor", "plot", "deform" ]
+
+[[case.boundary]]
+bc = "far"
+markers = [ "farfield" ]
+roles = [  ]
+
+[[case.boundary]]
+bc = "sym"
+markers = [ "symmetry" ]
+roles = [ "deform" ]
+
+[case.freestream]
+dimensionalization = "DIMENSIONAL"
+pressure = 101325.0
+reynolds_number = "6.0E6"
+temperature = 288.15
+
+[case.physics]
+kind = "euler"
+
+[case.reference]
+area = 0.5
+length = 1.0
+origin_moment = [ 0.25, 0.0, 0.0 ]
+
+[constraints]
+geometry = false
+
+[constraints.le_radius]
+enabled = false
+
+[constraints.lift]
+enabled = false
+
+[constraints.thickness]
+axes = "chord_zspan"
+enabled = false
+nChord = 2
+nSpan = 2
+scaled = false
+stations = [ [ 0.05, 0.071094 ], [ 0.15, 0.106902 ], [ 0.25, 0.118815 ], [ 0.35, 0.118935 ], [ 0.45, 0.111511 ], [ 0.55, 0.098818 ], [ 0.65, 0.0822 ], [ 0.75, 0.062409 ], [ 0.85, 0.039736 ], [ 0.95, 0.014079 ] ]
+te_offset = 0.01
+
+[constraints.volume]
+enabled = false
+
+[deform]
+linear_solver = "FGMRES"
+linear_solver_error = 1e-14
+linear_solver_iter = 500
+nonlinear_iter = 1
+stiffness_type = "INVERSE_VOLUME"
+
+[dv]
+
+[dv.shape]
+bound = 0.1
+direction = "y"
+enabled = true
+freeze_i = [ 0, -1 ]
+freeze_j = [ 0 ]
+link_k = true
+outward_only = true
+pattern = "ffd3d"
+scaler = "auto"
+
+[execution]
+adjoint_restart = false
+derivative_mode = "auto"
+task = "run_driver"
+
+[geometry]
+ffd = "airfoil_box"
+ffd_order = "bezier"
+pin_symmetry = true
+zspan = 0.5
+
+[geometry.ffd_files]
+airfoil_box = "input/ffd/ffd_adodg1_control_point_table3.xyz"
+
+[objective]
+expression = "wsum(drag)"
+scaler = 100.0
+
+[optimizer]
+name = "SLSQP"
+
+[optimizer.SLSQP]
+ACC = 1e-06
+IFILE = "opt_SLSQP.txt"
+MAXIT = 30
+
+[output]
+on_exists = "fail"
+run_id = "auto"
+
+[[points]]
+aoa_init = 0.0
+aoa_lower = 0.0
+aoa_upper = 0.0
+id = "adodg1"
+mach = 0.85
+weight = 1
+
+[solver]
+
+[solver.adjoint]
+conv_residual_minval = -8
+iter = 100000
+mglevel = 0
+
+[solver.adjoint_settings]
+relaxation_factor = 0.6
+
+[solver.convergence]
+cauchy_elems = 100
+cauchy_eps = "1E-6"
+startiter = 10
+
+[solver.linear]
+error = "1E-3"
+iter = 10
+prec = "ILU"
+solver = "FGMRES"
+
+[solver.multigrid]
+correction_smooth = 0
+cycle = "W_CYCLE"
+damp_prolongation = 1.0
+damp_restriction = 1.0
+post_smooth = 0
+pre_smooth = 1
+
+[solver.numerics]
+cfl_number = 10.0
+conv_method_flow = "JST"
+jst_sensor_coeff = "( 0.5, 0.02 )"
+num_method_grad = "WEIGHTED_LEAST_SQUARES"
+slope_limiter_flow = "VENKATAKRISHNAN"
+time_discre_flow = "EULER_IMPLICIT"
+venkat_limiter_coeff = 0.03
+
+[solver.primal]
+cfl_adapt = true
+conv_residual_minval = -10
+iter = 30000
+mglevel = 3
+warm_start = false
+
+[trim]
+enabled = false

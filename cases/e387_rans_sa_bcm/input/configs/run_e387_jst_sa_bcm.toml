@@ -1,0 +1,120 @@
+# Fully expanded runnable configuration.
+
+name = "e387_jst_sa_bcm"
+schema_version = 1
+
+[case]
+mesh = "input/mesh/e387_mesh2d_l2.su2"
+name = "e387_rans_sa_bcm"
+ndim = 2
+root = "cases/e387_rans_sa_bcm"
+
+[[case.boundary]]
+bc = "heatflux"
+markers = [ "Airfoil" ]
+roles = [ "design", "monitor", "plot", "deform" ]
+value = 0.0
+
+[[case.boundary]]
+bc = "far"
+markers = [ "Farfield" ]
+roles = [  ]
+
+[case.freestream]
+dimensionalization = "FREESTREAM_VEL_EQ_MACH"
+reynolds_length = 1.0
+reynolds_number = "4.0E6"
+temperature = 288.15
+
+[case.physics]
+kind = "rans_sa"
+turbulence_intensity = 0.001
+
+[case.physics.transition]
+model = "NONE"
+
+[case.physics.turbulence]
+model = "SA"
+options = [ "BCM" ]
+
+[case.reference]
+area = 0.0
+length = 1.0
+origin_moment = [ 0.25, 0.0, 0.0 ]
+
+[dv]
+
+[dv.shape]
+bound = 0.05
+enabled = true
+scaler = "auto"
+
+[execution]
+adjoint_restart = false
+derivative_mode = "rev"
+task = "run_model"
+
+[geometry]
+dat_file = "input/geom/e387_surface_mesh2d_l2.dat"
+n_cst = 8
+parameterization = "cst"
+zspan = 0.5
+
+[objective]
+expression = "wsum(drag)"
+scaler = 100.0
+
+[output]
+on_exists = "fail"
+
+[[points]]
+alpha = "design"
+aoa_init = 2.0
+aoa_lower = 0.0
+aoa_upper = 5.0
+id = "e387_m055_a2"
+mach = 0.55
+weight = 1.0
+
+[solver]
+
+[solver.adjoint]
+conv_residual_minval = -8
+iter = 30000
+mglevel = 0
+
+[solver.adjoint_settings]
+frozen_visc_disc = false
+relaxation_factor = 0.7
+
+[solver.linear]
+error = "1E-3"
+iter = 10
+prec = "ILU"
+solver = "FGMRES"
+
+[solver.numerics]
+cfl_number = 10.0
+conv_method_flow = "JST"
+conv_method_turb = "SCALAR_UPWIND"
+jst_sensor_coeff = "( 0.5, 0.02 )"
+muscl_turb = "NO"
+num_method_grad = "WEIGHTED_LEAST_SQUARES"
+slope_limiter_flow = "NONE"
+slope_limiter_turb = "NONE"
+time_discre_flow = "EULER_IMPLICIT"
+time_discre_turb = "EULER_IMPLICIT"
+
+[solver.primal]
+cfl_adapt = true
+conv_residual_minval = -11
+iter = 40000
+mglevel = 2
+warm_start = false
+
+[trim]
+alpha_clip = [ 0.0, 5.0 ]
+dcl_da_init = 0.131
+enabled = true
+max_iter = 6
+tol = 0.0001

@@ -1,0 +1,157 @@
+# Self-contained resolved configuration. Do not add include.
+
+schema_version = 1
+name = "mp4_ffd10_slsqp"
+
+[case]
+name = "rae2822_rans_sa_hh"
+root = "cases/rae2822_rans_sa_hh"
+ndim = 2
+mesh = "input/mesh/mesh_RAE2822_turb.su2"
+
+[[case.boundary]]
+markers = ["AIRFOIL"]
+bc = "heatflux"
+value = 0.0
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["FARFIELD"]
+bc = "far"
+roles = []
+
+[case.reference]
+origin_moment = [0.25, 0.0, 0.0]
+length = 1.0
+area = 1.0
+
+[case.freestream]
+temperature = 288.15
+reynolds_number = "9.0E6"
+reynolds_length = 1.0
+
+[geometry]
+ffd = "ffd10"
+zspan = 0.5
+
+[geometry.ffd_files]
+ffd10 = "input/ffd/ffd_rae2822.xyz"
+ffd20 = "input/ffd/ffd_rae2822_20.xyz"
+ffd30 = "input/ffd/ffd_rae2822_30.xyz"
+ffd30cos = "input/ffd/ffd_rae2822_30_cosine.xyz"
+ffd30cosfit = "input/ffd/ffd_rae2822_30_cosine_fitted.xyz"
+
+[constraints]
+geometry = true
+
+[constraints.thickness]
+stations = [[0.35, 0.1204], [0.96, 0.005], [0.99, 0.0012]]
+# explicit: an enabled block states every value it uses
+enabled = true
+axes = "chord_zspan"
+nSpan = 2
+nChord = 2
+scaled = false
+te_offset = 0.05
+
+[constraints.lift]
+enabled = true
+kind = "equals"
+equals = 0.733
+scaler = 1.0
+
+[[points]]
+id = "pt0"
+mach = 0.68
+weight = 1
+aoa_init = 3.0
+# explicit: an enabled block states every value it uses
+aoa_upper = 5.0
+
+[[points]]
+id = "pt1"
+mach = 0.71
+weight = 1
+aoa_init = 2.7
+# explicit: an enabled block states every value it uses
+aoa_upper = 5.0
+
+[[points]]
+id = "pt2"
+mach = 0.74
+weight = 2
+aoa_init = 2.4
+# explicit: an enabled block states every value it uses
+aoa_upper = 5.0
+
+[[points]]
+id = "pt3"
+mach = 0.76
+weight = 3
+aoa_init = 2.1
+# explicit: an enabled block states every value it uses
+aoa_upper = 5.0
+
+[dv]
+[dv.shape]
+pattern = "control_point_2d"
+bound = 0.05
+scaler = 10.0
+# explicit: an enabled block states every value it uses
+enabled = true
+direction = "y"
+
+[dv.alpha]
+per_point = true
+
+[objective]
+expression = "wsum(drag)"
+scaler = 100.0
+
+[optimizer]
+name = "SLSQP"
+
+[optimizer.SLSQP]
+ACC = 1e-05
+MAXIT = 60
+IFILE = "opt_SLSQP.txt"
+
+[trim]
+enabled = true
+max_iter = 6
+tol = 0.0001
+dcl_da_init = 0.11
+# explicit: an enabled block states every value it uses
+alpha_clip = [0.0, 5.0]
+
+[execution]
+task = "run_model"
+parallel_points = false
+adjoint_restart = true
+derivative_mode = "rev"
+
+[output]
+on_exists = "fail"
+run_id = "auto"
+
+[constraints.volume]
+# explicit: an enabled block states every value it uses
+enabled = true
+le_x = 0.01
+te_x = 0.99
+nSpan = 2
+nChord = 10
+lower = 1.0
+
+[constraints.le_radius]
+# explicit: an enabled block states every value it uses
+enabled = true
+le_x = 0.01
+nSpan = 2
+lower = 0.8
+axis = [0.0, 1.0, 0.0]
+chord_dir = [-1.0, 0.0, 0.0]
+
+[solver.primal]
+# explicit: an enabled block states every value it uses
+warm_start = true

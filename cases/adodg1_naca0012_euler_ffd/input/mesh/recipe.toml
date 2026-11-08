@@ -1,0 +1,75 @@
+# run/mesh.py recipe for the ADODG Case 1 full-airfoil Euler meshes.
+#
+# full129 matches the half mesh (configs/run_half_sp.toml): the paper's Eq. 8
+# section with a sharp TE (naca4 closed, A4 = -0.1036), 129 cosine-spaced
+# nodes per surface including LE and TE, first height 5e-4 c, ratio 1.2,
+# near-wall block 0.024 c, far field radius 50 c about (0.5, 0) and the size
+# field min(15, max(0.005, 0.07 d)). It replaces the 64-node-per-surface gmsh
+# mesh for the FFD-thickness method, which the paper runs on a full mesh.
+# full257 halves every in-plane size, the first cell and (ratio - 1): the
+# refined full mesh of the control study's A4 rows.
+#
+# Regenerate (from the repository root):
+#   python run/mesh.py all --config cases/adodg1_naca0012_euler_ffd/input/mesh/recipe.toml \
+#       --level <full129|full257>
+# Source: the NACA 0012 section is generated here (naca4:0012:closed); no external input.
+
+[mesh.outputs]
+case = "adodg1"
+set = "euler"
+surface = "../geom/{case}_surface_{set}_{level}.dat"
+mesh = "{case}_{set}_{level}.su2"
+
+[mesh.airfoil]
+enabled = true
+source = "naca4:0012:closed:129"
+spacing = "cosine"
+te = "keep"
+
+[mesh.airfoil.levels.full129]
+n_points = 257
+
+[mesh.airfoil.levels.full257]
+n_points = 513
+
+# Inviscid gates. Every Case 1 mesh has a few skewed cells where the
+# near-wall block ends at the sharp TE: the admitted half mesh 6 cells, max
+# 0.908; the gmsh full mesh 3, max 0.831; full129 with this fan 4, max 0.933
+# (fans of 60-180 deg with 5-31 elements give 0.93-0.96 at x = 1.003,
+# y = 0.025). The skewness gate is set above them; admission also needs the
+# cold baseline C_D within 1.5 ct of the half mesh's 468.93.
+[mesh.mesh2d]
+enabled = true
+attempts = 5
+bl_thickness = 0.024
+fan_angle_deg = 120.0
+fan_elements = 13
+farfield_radius = 50.0
+farfield_meshsize = 15.0
+wall_meshsize = 0.0
+wall_marker = "airfoil"
+farfield_marker = "farfield"
+farfield_center = [0.5, 0.0]
+
+[mesh.mesh2d.quality]
+min_first_cell_height_ratio = 0.5
+max_first_cell_height_ratio = 2.0
+min_bl_thickness_ratio = 0.5
+max_bl_thickness_ratio = 2.0
+max_skewness = 0.95
+max_aspect_ratio_p99 = 40.0
+
+[mesh.mesh2d.levels.full129]
+first_cell_height = 5.0e-4
+growth_ratio = 1.2
+near_meshsize = 0.005
+far_growth_slope = 0.07
+
+# Twice the fan elements for twice the wall resolution: 13 left one cell at
+# skewness 0.977 below the TE; 25 gives max 0.942.
+[mesh.mesh2d.levels.full257]
+first_cell_height = 2.5e-4
+growth_ratio = 1.1
+near_meshsize = 0.0025
+far_growth_slope = 0.035
+fan_elements = 25

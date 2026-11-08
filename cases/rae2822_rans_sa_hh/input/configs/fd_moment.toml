@@ -1,0 +1,171 @@
+# Self-contained resolved configuration. Do not add include.
+
+schema_version = 1
+name = "rae2822_moment_alpha_check_totals"
+
+[case]
+name = "rae2822_rans_sa_hh"
+root = "cases/rae2822_rans_sa_hh"
+ndim = 2
+mesh = "input/mesh/mesh_RAE2822_turb.su2"
+
+[[case.boundary]]
+markers = ["AIRFOIL"]
+bc = "heatflux"
+value = 0.0
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["FARFIELD"]
+bc = "far"
+roles = []
+
+[case.reference]
+origin_moment = [0.25, 0.0, 0.0]
+length = 1.0
+area = 1.0
+
+[case.freestream]
+temperature = 288.15
+reynolds_number = "9.0E6"
+reynolds_length = 1.0
+
+[geometry]
+ffd = "ffd10"
+zspan = 0.5
+
+[geometry.ffd_files]
+ffd10 = "input/ffd/ffd_rae2822.xyz"
+ffd20 = "input/ffd/ffd_rae2822_20.xyz"
+ffd30 = "input/ffd/ffd_rae2822_30.xyz"
+ffd30cos = "input/ffd/ffd_rae2822_30_cosine.xyz"
+ffd30cosfit = "input/ffd/ffd_rae2822_30_cosine_fitted.xyz"
+
+[constraints]
+geometry = true
+
+[constraints.thickness]
+stations = [[0.35, 0.1204], [0.96, 0.005], [0.99, 0.0012]]
+# explicit: an enabled block states every value it uses
+enabled = true
+axes = "chord_zspan"
+nSpan = 2
+nChord = 2
+scaled = false
+te_offset = 0.05
+
+[constraints.lift]
+enabled = true
+kind = "equals"
+equals = 0.733
+# explicit: an enabled block states every value it uses
+scaler = 1.0
+
+[constraints.moment]
+enabled = false
+axis = "z"
+pivot = [0.25, 0.0, 0.0]
+
+[[points]]
+id = "sp0"
+mach = 0.74
+weight = 1
+aoa_init = 2.7
+# explicit: an enabled block states every value it uses
+aoa_upper = 5.0
+
+[dv]
+[dv.shape]
+pattern = "control_point_2d"
+bound = 0.05
+scaler = "auto"
+# explicit: an enabled block states every value it uses
+enabled = true
+direction = "y"
+
+[objective]
+expression = "wsum(drag)"
+scaler = 100.0
+
+[optimizer]
+name = "SLSQP"
+
+[optimizer.SLSQP]
+MAXIT = 50
+
+[solver]
+[solver.primal]
+iter = 10000
+mglevel = 3
+cfl_adapt = true
+conv_residual_minval = -12
+warm_start = false
+
+[solver.adjoint]
+iter = 50000
+mglevel = 0
+conv_residual_minval = -10
+
+[solver.linear]
+error = "1E-8"
+iter = 10
+
+[solver.adjoint_settings]
+relaxation_factor = 0.7
+
+[execution]
+task = "check_totals"
+adjoint_restart = false
+derivative_mode = "rev"
+
+[verification]
+# Acceptance bands match code defaults so reported verdicts reproduce.
+alpha_band = 0.0001
+shape_band_floor = 0.001
+shape_band_slope = 0.002
+shape_step = 1e-06
+alpha_step = 0.001
+form = "central"
+step_calc = "abs"
+cancellation_cr_param = "ffd10"
+alpha_outputs = ["C_M"]
+shape_outputs = ["C_M"]
+record_shape_sensitivities = true
+alpha_band_moment_pivot = 0.0001
+
+[verification.cancellation_cr]
+C_D = [25.9, 4.6, 3.8, 1.7, 3.3, 2.3, 5.4, 9.5, 12.1, 2.5, 2.8, 5.3, 1.2, 1.5, 2.3, 2.3, 5.4, 2.0]
+C_L = [12.7, 66.4, 47.3, 7.0, 6.7, 168.2, 7.0, 6.9, 5.2, 10.0, 1.3, 1.7, 1.1, 1.1, 2.1, 2.0, 8.0, 1.7]
+C_M = [8.1, 19.8, 3059.3, 6.5, 6.9, 5.1, 4.1, 30.7, 3.4, 32.2, 1.3, 1.6, 1.0, 1.0, 1.9, 1.8, 5.8, 1.6]
+
+[verification.shape_rows_unverifiable]
+C_M = [2]
+
+[trim]
+# explicit: an enabled block states every value it uses
+enabled = true
+max_iter = 6
+tol = 0.0001
+dcl_da_init = 0.11
+alpha_clip = [0.0, 5.0]
+
+[constraints.volume]
+# explicit: an enabled block states every value it uses
+enabled = true
+le_x = 0.01
+te_x = 0.99
+nSpan = 2
+nChord = 10
+lower = 1.0
+
+[constraints.le_radius]
+# explicit: an enabled block states every value it uses
+enabled = true
+le_x = 0.01
+nSpan = 2
+lower = 0.8
+axis = [0.0, 1.0, 0.0]
+chord_dir = [-1.0, 0.0, 0.0]
+
+[output]
+on_exists = "fail"

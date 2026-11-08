@@ -1,0 +1,32 @@
+schema_version = 1
+
+[case]
+name = "e387_rans_sa_bcm"
+root = "cases/e387_rans_sa_bcm"
+ndim = 2
+mesh = "input/mesh/ogrid_e387.su2"
+
+[case.physics]
+kind = "rans_sa"
+
+[[case.boundary]]
+markers = ["Airfoil"]
+bc = "heatflux"
+value = 0.0
+roles = ["design", "monitor", "plot", "deform"]
+
+[[case.boundary]]
+markers = ["Farfield"]
+bc = "far"
+roles = []
+
+[case.reference]
+origin_moment = [0.25, 0.0, 0.0]
+length = 1.0
+area = 0.0
+
+[case.freestream]
+temperature = 288.15
+reynolds_number = "200000.0"
+reynolds_length = 1.0
+dimensionalization = "FREESTREAM_VEL_EQ_MACH"
